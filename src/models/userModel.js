@@ -1,51 +1,37 @@
-import mongoose from "mongoose";
-import {bcrypt} from "bcryptjs";
-const userSchema= new mongoose.Schema(
-    {
-    userName: {
-        type: String,
-        require: true,
-        unique: true,
+import mongoose from 'mongoose';
 
+const userSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+        trim: true,
     },
     email: {
         type: String,
-        require: true,
+        required: true,
         unique: true,
+        trim: true,
         lowercase: true,
-
     },
     password: {
         type: String,
-        require: [true,'Password is required']
-
+        required: true,
     },
-    role :{
-        type: String,
-        enum: ['customer', 'admin'], default: 'customer',
+    isAdmin: {
+        type: Boolean,
+        default: false,
     },
-    address: {
-        type:String,
-        require:true,
-    },
-
-    
-        timestamp:true,
-    
-
+}, {
+    timestamps: true,  // Adds createdAt and updatedAt fields
 });
 
-//hashing password
-userSchema.pre("save", async function (next) {
-    if(!this.isModified("password")) return next();
+// Add a method to the model to exclude the password in responses if needed
+userSchema.methods.toJSON = function () {
+    const userObject = this.toObject();
+    delete userObject.password;
+    return userObject;
+};
 
-    this.password = await bcrypt.hash(this.password, 10)
-    next()
-})
+const User = mongoose.model('User', userSchema);
 
-userSchema.methods.isPasswordCorrect = async function(password){
-    return await bcrypt.compare(password, this.password)
-}
-
-
-export const User = mongoose.model("User", userSchema)
+export default User;
