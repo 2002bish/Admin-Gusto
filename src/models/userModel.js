@@ -31,6 +31,5 @@ userSchema.methods.toJSON = function () {
     delete userObject.password;
     return userObject;
 };
-
 const User = mongoose.model('User', userSchema);
 export default User;
